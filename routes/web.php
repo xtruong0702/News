@@ -17,6 +17,10 @@ Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('regi
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Bình luận (Chỉ cho user đã đăng nhập)
+Route::post('/comments', [\App\Http\Controllers\CommentController::class, 'store'])->middleware('auth')->name('comments.store');
+
+
 
 
 /*
@@ -27,15 +31,17 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Trang chủ
 Route::get('/', function () {
-    $posts = Post::latest()->get();
+    $posts = Post::latest()->paginate(12);
     $trendingPosts = Post::orderBy('views', 'desc')->take(5)->get();
     return view('home', compact('posts', 'trendingPosts'));
 });
 
 
+
+
 // Trang chi tiết bài viết
 Route::get('/article/{slug}', function ($slug) {
-    $post = Post::where('slug', $slug)->firstOrFail();
+    $post = Post::where('slug', $slug)->with('comments.user')->firstOrFail();
     $post->increment('views'); // Tăng lượt xem
     return view('article', compact('post'));
 });

@@ -29,4 +29,13 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Một người dùng có nhiều bình luận.
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 }
+

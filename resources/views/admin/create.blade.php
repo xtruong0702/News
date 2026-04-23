@@ -21,10 +21,14 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Chuyên mục</label>
                                 <select name="category" class="form-select">
+                                    <option value="Thời trang">Thời trang</option>
+                                    <option value="Làm đẹp">Làm đẹp</option>
+                                    <option value="Sống khỏe">Sống khỏe</option>
                                     <option value="Công nghệ">Công nghệ</option>
                                     <option value="Thế giới">Thế giới</option>
                                     <option value="Kinh doanh">Kinh doanh</option>
                                 </select>
+
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Link hình ảnh (URL)</label>

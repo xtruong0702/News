@@ -12,15 +12,12 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item"><a class="nav-link" href="/">Trang chủ</a></li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url('/category/Công nghệ') }}">Công nghệ</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url('/category/Đời sống') }}">Đời sống</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url('/category/Thế giới') }}">Thế giới</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link px-3" href="/category/Thời trang">Thời trang</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="/category/Làm đẹp">Làm đẹp</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="/category/Sống khỏe">Sống khỏe</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="/category/Công nghệ">Công nghệ</a></li>
+                    <li class="nav-item"><a class="nav-link px-3" href="/category/Thế giới">Thế giới</a></li>
+
                 </ul>
                 
                 <div class="d-flex align-items-center">

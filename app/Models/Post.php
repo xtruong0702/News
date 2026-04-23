@@ -15,4 +15,11 @@ class Post extends Model
         'image', 
         'category'
     ];
+    /**
+     * Một bài viết có nhiều bình luận.
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class)->latest();
+    }
 }
