@@ -11,10 +11,12 @@
                     <h5 class="mb-0 fw-bold">Soạn thảo bài viết mới</h5>
                 </div>
                 <div class="card-body">
-                    <form action="/admin/posts" method="POST">
-                        @csrf <div class="mb-3">
+                    <form action="/admin/posts" method="POST" enctype="multipart/form-data">
+                        @csrf 
+                        <div class="mb-3">
                             <label class="form-label fw-bold">Tiêu đề bài viết</label>
-                            <input type="text" name="title" class="form-control" placeholder="Nhập tiêu đề hấp dẫn..." required>
+                            <input type="text" name="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title') }}" placeholder="Nhập tiêu đề hấp dẫn..." required>
+                            @error('title') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="row">
@@ -31,19 +33,31 @@
 
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Link hình ảnh (URL)</label>
-                                <input type="text" name="image" class="form-control" placeholder="https://example.com/image.jpg">
+                                <label class="form-label fw-bold">Tải lên hình ảnh</label>
+                                <input type="file" name="image" class="form-control @error('image') is-invalid @enderror" accept="image/*">
+                                <small class="text-muted">Định dạng hỗ trợ: JPG, PNG, WEBP (Max 2MB)</small>
+                                @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Mô tả ngắn</label>
-                            <textarea name="description" class="form-control" rows="2" placeholder="Tóm tắt bài viết trong 2 câu..."></textarea>
+                            <textarea name="description" class="form-control @error('description') is-invalid @enderror" rows="2" placeholder="Tóm tắt bài viết trong 2 câu...">{{ old('description') }}</textarea>
+                            @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Nội dung chi tiết</label>
-                            <textarea id="tinymce-editor" name="content" class="form-control" rows="15" placeholder="Viết nội dung tại đây..."></textarea>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label fw-bold mb-0">Nội dung chi tiết</label>
+                                <button type="button" id="ai-suggest-btn" class="btn btn-sm btn-outline-secondary rounded-pill">
+                                    <i class="bi bi-robot me-1"></i> AI viết bài giúp bạn
+                                </button>
+                            </div>
+                            <div id="ai-loading" class="small text-primary mb-2 d-none">
+                                <span class="spinner-border spinner-border-sm me-2"></span> AI đang suy nghĩ và viết bài...
+                            </div>
+                            <textarea id="tinymce-editor" name="content" class="form-control @error('content') is-invalid @enderror" rows="15" placeholder="Viết nội dung tại đây...">{{ old('content') }}</textarea>
+                            @error('content') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
 
 
@@ -59,13 +73,57 @@
 </div>
 <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
 <script>
+    let editorInstance;
     ClassicEditor
         .create(document.querySelector('#tinymce-editor'), {
             toolbar: [ 'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', 'insertTable', 'undo', 'redo' ]
         })
+        .then(editor => {
+            editorInstance = editor;
+        })
         .catch(error => {
             console.error(error);
         });
+
+    // AI Suggest Logic
+    document.getElementById('ai-suggest-btn').addEventListener('click', function() {
+        const title = document.querySelector('input[name="title"]').value;
+        if (!title) {
+            alert('Vui lòng nhập tiêu đề bài viết trước!');
+            return;
+        }
+
+        const btn = this;
+        const loading = document.getElementById('ai-loading');
+        
+        btn.disabled = true;
+        loading.classList.remove('d-none');
+
+        fetch('{{ route("ai.suggest") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ title: title })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.suggestion) {
+                editorInstance.setData(data.suggestion);
+            } else {
+                alert('Có lỗi xảy ra: ' + (data.error || 'AI không trả về kết quả.'));
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Lỗi kết nối AI.');
+        })
+        .finally(() => {
+            btn.disabled = false;
+            loading.classList.add('d-none');
+        });
+    });
 </script>
 @endsection
 

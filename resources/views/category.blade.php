@@ -10,7 +10,7 @@
         @forelse($posts as $post)
         <div class="col-md-4 mb-4">
             <div class="card card-news h-100 shadow-sm border-0">
-                <img src="{{ $post->image }}" class="card-img-top p-2 rounded-4" alt="{{ $post->title }}">
+                <img src="{{ str_starts_with($post->image, 'http') ? $post->image : asset('storage/' . $post->image) }}" class="card-img-top p-2 rounded-4" alt="{{ $post->title }}">
                 <div class="card-body">
                     <h5 class="card-title fw-bold">
                         <a href="{{ url('/article/' . $post->slug) }}" class="text-decoration-none text-dark">

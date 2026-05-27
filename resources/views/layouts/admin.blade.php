@@ -7,7 +7,10 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        :root { --sidebar-width: 250px; --primary-admin: #1E3A8A; }
+        :root { 
+            --sidebar-width: 250px; 
+            --primary-admin: {{ Auth::user()->role === 'admin' ? '#1E3A8A' : '#4F46E5' }}; 
+        }
         body { background-color: #f4f6f9; font-family: 'Inter', sans-serif; }
         #sidebar {
             width: var(--sidebar-width);
@@ -16,6 +19,7 @@
             background: var(--primary-admin);
             color: white;
             transition: all 0.3s;
+            background-image: linear-gradient(180deg, var(--primary-admin) 0%, {{ Auth::user()->role === 'admin' ? '#1e40af' : '#6366f1' }} 100%);
         }
         #sidebar .nav-link { color: rgba(255,255,255,0.8); margin-bottom: 5px; }
         #sidebar .nav-link:hover, #sidebar .nav-link.active { background: rgba(255,255,255,0.1); color: white; border-radius: 5px; }
@@ -27,13 +31,21 @@
 <body>
 
     <div id="sidebar" class="p-3 shadow">
-        <h3 class="text-center fw-bold mb-4">NEWS ADMIN</h3>
+        <h3 class="text-center fw-bold mb-4">
+            @if(Auth::user()->role === 'admin')
+                <i class="bi bi-shield-lock me-2"></i>NEWS ADMIN
+            @else
+                <i class="bi bi-pen me-2"></i>WRITER STUDIO
+            @endif
+        </h3>
         <hr>
         <ul class="nav flex-column">
-            <li class="nav-item"><a href="/admin/dashboard" class="nav-link active"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
-            <li class="nav-item"><a href="/admin/posts" class="nav-link"><i class="bi bi-file-earmark-post me-2"></i> Bài viết</a></li>
+            <li class="nav-item"><a href="/admin/dashboard" class="nav-link {{ Request::is('admin/dashboard') ? 'active' : '' }}"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
+            <li class="nav-item"><a href="/admin/posts" class="nav-link {{ Request::is('admin/posts*') ? 'active' : '' }}"><i class="bi bi-file-earmark-post me-2"></i> Bài viết</a></li>
             <li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-grid me-2"></i> Chuyên mục</a></li>
-            <li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-people me-2"></i> Người dùng</a></li>
+            @if(Auth::user()->role === 'admin')
+            <li class="nav-item"><a href="/admin/users" class="nav-link {{ Request::is('admin/users*') ? 'active' : '' }}"><i class="bi bi-people me-2"></i> Người dùng</a></li>
+            @endif
             <li class="nav-item mt-5"><a href="/" class="nav-link text-warning"><i class="bi bi-arrow-left-circle me-2"></i> Xem Website</a></li>
         </ul>
     </div>
@@ -42,8 +54,11 @@
         <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm rounded mb-4 px-3">
             <span class="navbar-brand mb-0 h1">Quản lý hệ thống</span>
             <div class="ms-auto">
-                <span class="me-3">Xin chào, <strong>Admin</strong></span>
-                <button class="btn btn-sm btn-danger">Đăng xuất</button>
+                <span class="me-3">Xin chào, <strong>{{ Auth::user()->name }}</strong> ({{ Auth::user()->role }})</span>
+                <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Đăng xuất</button>
+                </form>
             </div>
         </nav>
         

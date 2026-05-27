@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Post;           // <--- THÊM DÒNG NÀY
-use Illuminate\Support\Str;    // <--- ĐẢM BẢO CÓ DÒNG NÀY
+use App\Models\Post;
 
 class PostSeeder extends Seeder
 {
@@ -13,16 +13,6 @@ class PostSeeder extends Seeder
      */
     public function run(): void
     {
-        for ($i = 1; $i <= 10; $i++) {
-            $title = "Bài viết tin tức số " . $i;
-            Post::create([
-                'title' => $title,
-                'slug' => Str::slug($title),
-                'description' => "Đây là mô tả ngắn cho bài viết thứ " . $i,
-                'content' => "Đây là nội dung chi tiết cực kỳ dài của bài viết...",
-                'image' => "https://picsum.photos/id/".($i+20)."/800/450",
-                'category' => "Công nghệ",
-            ]);
-        }
+        Post::factory()->count(50)->create();
     }
 }
