@@ -23,12 +23,9 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Chuyên mục</label>
                                 <select name="category" class="form-select">
-                                    <option value="Thời trang">Thời trang</option>
-                                    <option value="Làm đẹp">Làm đẹp</option>
-                                    <option value="Sống khỏe">Sống khỏe</option>
-                                    <option value="Công nghệ">Công nghệ</option>
-                                    <option value="Thế giới">Thế giới</option>
-                                    <option value="Kinh doanh">Kinh doanh</option>
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat->name }}" {{ old('category') == $cat->name ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                    @endforeach
                                 </select>
 
                             </div>
@@ -87,9 +84,9 @@
 
     // AI Suggest Logic
     document.getElementById('ai-suggest-btn').addEventListener('click', function() {
-        const title = document.querySelector('input[name="title"]').value;
-        if (!title) {
-            alert('Vui lòng nhập tiêu đề bài viết trước!');
+        const description = document.querySelector('textarea[name="description"]').value;
+        if (!description || description.trim() === '') {
+            alert('Vui lòng nhập mô tả ngắn trước khi dùng AI gợi ý bài viết!');
             return;
         }
 
@@ -105,7 +102,7 @@
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             },
-            body: JSON.stringify({ title: title })
+            body: JSON.stringify({ description: description })
         })
         .then(response => response.json())
         .then(data => {

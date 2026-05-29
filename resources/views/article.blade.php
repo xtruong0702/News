@@ -175,6 +175,9 @@
                         <button id="ai-summarize-btn" class="btn btn-ai rounded-pill py-2 shadow-sm fw-bold">
                             <i class="fas fa-magic me-2"></i> Tóm tắt bài viết
                         </button>
+                        <button id="ai-translate-btn" class="btn btn-ai rounded-pill py-2 shadow-sm fw-bold" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);" data-lang="vi">
+                            <i class="fas fa-language me-2"></i> <span>Dịch sang Tiếng Anh</span>
+                        </button>
                         <button id="tts-btn" class="btn btn-ai-outline rounded-pill py-2 shadow-sm fw-bold">
                             <i class="fas fa-volume-up me-2"></i> <span>Nghe bài báo</span>
                         </button>
@@ -472,5 +475,109 @@
     window.onbeforeunload = function() {
         if (audio) audio.pause();
     };
+
+    // --- AI Translate Logic ---
+    const translateBtn = document.getElementById('ai-translate-btn');
+    if (translateBtn) {
+        const articleTitle = document.querySelector('.article-title');
+        const articleSapo = document.querySelector('.lead');
+        const contentText = document.querySelector('.content-text');
+        
+        const originalContent = {
+            title: articleTitle ? articleTitle.innerText : '',
+            sapo: articleSapo ? articleSapo.innerText : '',
+            content: contentText ? contentText.innerHTML : ''
+        };
+        
+        let translatedContent = null; // Cache for translated English content
+        
+        translateBtn.addEventListener('click', function() {
+            const currentLang = this.getAttribute('data-lang'); // 'vi' or 'en'
+            const btnText = this.querySelector('span');
+            const btnIcon = this.querySelector('i');
+            
+            if (currentLang === 'en') {
+                // Restore original Vietnamese content instantly!
+                if (articleTitle) articleTitle.innerText = originalContent.title;
+                if (articleSapo) articleSapo.innerText = originalContent.sapo;
+                if (contentText) contentText.innerHTML = originalContent.content;
+                
+                this.setAttribute('data-lang', 'vi');
+                this.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                if (btnText) btnText.innerText = 'Dịch sang Tiếng Anh';
+                if (btnIcon) btnIcon.className = 'fas fa-language me-2';
+                return;
+            }
+            
+            // Switch to English translation
+            if (translatedContent) {
+                if (articleTitle) articleTitle.innerHTML = translatedContent.title;
+                if (articleSapo) articleSapo.innerHTML = translatedContent.sapo;
+                if (contentText) contentText.innerHTML = translatedContent.content;
+                
+                this.setAttribute('data-lang', 'en');
+                this.style.background = 'linear-gradient(135deg, #4b5563 0%, #1f2937 100%)'; // Gray toggle color
+                if (btnText) btnText.innerText = 'Xem Tiếng Việt';
+                if (btnIcon) btnIcon.className = 'fas fa-undo me-2';
+                return;
+            }
+            
+            // Perform AJAX call to translate
+            translateBtn.disabled = true;
+            if (btnText) btnText.innerText = 'Đang dịch thuật...';
+            
+            // Wrap contents inside custom tags to easily split them back
+            const combinedHtml = `
+                <div id="t-title">${originalContent.title}</div>
+                <div id="t-sapo">${originalContent.sapo}</div>
+                <div id="t-body">${originalContent.content}</div>
+            `;
+            
+            fetch('{{ route("ai.translate") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    content: combinedHtml,
+                    target_lang: 'en'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                translateBtn.disabled = false;
+                if (data.translated) {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(data.translated, 'text/html');
+                    
+                    translatedContent = {
+                        title: doc.getElementById('t-title') ? doc.getElementById('t-title').innerHTML : 'Translated Title',
+                        sapo: doc.getElementById('t-sapo') ? doc.getElementById('t-sapo').innerHTML : 'Translated Sapo',
+                        content: doc.getElementById('t-body') ? doc.getElementById('t-body').innerHTML : 'Translated Content'
+                    };
+                    
+                    // Replace elements with translated English HTML
+                    if (articleTitle) articleTitle.innerHTML = translatedContent.title;
+                    if (articleSapo) articleSapo.innerHTML = translatedContent.sapo;
+                    if (contentText) contentText.innerHTML = translatedContent.content;
+                    
+                    this.setAttribute('data-lang', 'en');
+                    this.style.background = 'linear-gradient(135deg, #4b5563 0%, #1f2937 100%)';
+                    if (btnText) btnText.innerText = 'Xem Tiếng Việt';
+                    if (btnIcon) btnIcon.className = 'fas fa-undo me-2';
+                } else {
+                    alert('Lỗi dịch bài báo: ' + (data.error || 'AI phản hồi trống.'));
+                    if (btnText) btnText.innerText = 'Dịch sang Tiếng Anh';
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Lỗi kết nối khi dịch thuật.');
+                translateBtn.disabled = false;
+                if (btnText) btnText.innerText = 'Dịch sang Tiếng Anh';
+            });
+        });
+    }
 </script>
 @endsection

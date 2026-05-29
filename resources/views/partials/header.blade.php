@@ -25,6 +25,11 @@
                 </ul>
                 
                 <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
+                    {{-- Theme Toggle Button --}}
+                    <button type="button" id="theme-toggle-btn" class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center border shadow-sm" style="width: 40px; height: 40px;" title="Chuyển chế độ Sáng/Tối">
+                        <i id="theme-icon" class="bi bi-moon-fill text-secondary fs-5"></i>
+                    </button>
+
                     {{-- Search Bar Bo tròn --}}
                     <form action="{{ route('search') }}" method="GET" class="position-relative d-none d-md-block">
                         <input name="query" class="form-control rounded-pill ps-4 pe-5 border-0 bg-light" type="search" placeholder="Tìm kiếm tin tức..." style="width: 250px;">
@@ -69,4 +74,34 @@
         </div>
     </nav>
 </header>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const themeBtn = document.getElementById('theme-toggle-btn');
+        const themeIcon = document.getElementById('theme-icon');
+        
+        function updateThemeUI(isDark) {
+            if (isDark) {
+                document.documentElement.classList.add('dark-mode');
+                if (themeIcon) themeIcon.className = 'bi bi-sun-fill text-warning fs-5';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+                if (themeIcon) themeIcon.className = 'bi bi-moon-fill text-secondary fs-5';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+        
+        // Initial state check
+        const isDark = document.documentElement.classList.contains('dark-mode');
+        updateThemeUI(isDark);
+        
+        if (themeBtn) {
+            themeBtn.addEventListener('click', function() {
+                const currentDark = document.documentElement.classList.contains('dark-mode');
+                updateThemeUI(!currentDark);
+            });
+        }
+    });
+</script>
  

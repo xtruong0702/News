@@ -42,7 +42,7 @@
         <ul class="nav flex-column">
             <li class="nav-item"><a href="/admin/dashboard" class="nav-link {{ Request::is('admin/dashboard') ? 'active' : '' }}"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a></li>
             <li class="nav-item"><a href="/admin/posts" class="nav-link {{ Request::is('admin/posts*') ? 'active' : '' }}"><i class="bi bi-file-earmark-post me-2"></i> Bài viết</a></li>
-            <li class="nav-item"><a href="#" class="nav-link"><i class="bi bi-grid me-2"></i> Chuyên mục</a></li>
+            <li class="nav-item"><a href="{{ route('categories.index') }}" class="nav-link {{ Request::is('admin/categories*') ? 'active' : '' }}"><i class="bi bi-grid me-2"></i> Chuyên mục</a></li>
             @if(Auth::user()->role === 'admin')
             <li class="nav-item"><a href="/admin/users" class="nav-link {{ Request::is('admin/users*') ? 'active' : '' }}"><i class="bi bi-people me-2"></i> Người dùng</a></li>
             @endif

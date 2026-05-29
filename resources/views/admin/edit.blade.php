@@ -24,12 +24,9 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-bold">Chuyên mục</label>
                                 <select name="category" class="form-select">
-                                    <option value="Thời trang" {{ $post->category == 'Thời trang' ? 'selected' : '' }}>Thời trang</option>
-                                    <option value="Làm đẹp" {{ $post->category == 'Làm đẹp' ? 'selected' : '' }}>Làm đẹp</option>
-                                    <option value="Sống khỏe" {{ $post->category == 'Sống khỏe' ? 'selected' : '' }}>Sống khỏe</option>
-                                    <option value="Công nghệ" {{ $post->category == 'Công nghệ' ? 'selected' : '' }}>Công nghệ</option>
-                                    <option value="Thế giới" {{ $post->category == 'Thế giới' ? 'selected' : '' }}>Thế giới</option>
-                                    <option value="Kinh doanh" {{ $post->category == 'Kinh doanh' ? 'selected' : '' }}>Kinh doanh</option>
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat->name }}" {{ old('category', $post->category) == $cat->name ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                    @endforeach
                                 </select>
 
                             </div>

@@ -30,6 +30,10 @@ return [
 
     'gemini' => [
         'key' => env('GEMINI_API_KEY'),
+        // Model name (without the /models/ prefix). Configure in .env as GEMINI_MODEL=gemini-3.5-flash
+        'model' => env('GEMINI_MODEL', 'gemini-3.5-flash'),
+        // API version to use for the endpoint (v1 is recommended)
+        'version' => env('GEMINI_API_VERSION', 'v1'),
     ],
 
     'ses' => [

@@ -1,0 +1,654 @@
+# THUYẾT MINH LUẬN VĂN TỐT NGHIỆP / BÁO CÁO PHÂN TÍCH THIẾT KẾ HỆ THỐNG KỸ THUẬT
+## ĐỀ TÀI: PHÁT TRIỂN CỔNG THÔNG TIN ĐIỆN TỬ ĐA PHƯƠNG TIỆN NEWS 24H TÍCH HỢP HỆ THỐNG TỰ ĐỘNG HÓA TRÍ TUỆ NHÂN TẠO GEMINI AI ENGINE VÀ VOICE ENGINE FPT AI PHÁT LẠI KHÔNG ĐỒNG BỘ
+
+---
+
+## 📝 1. Giới thiệu
+
+Cuộc cách mạng công nghiệp lần thứ tư (CMCN 4.0) đã và đang tái định hình toàn bộ các lĩnh vực trong đời sống kinh tế - xã hội, trong đó báo chí và truyền thông kỹ thuật số là một trong những ngành đi đầu. Mô hình đọc báo truyền thống với các dòng chữ viết tĩnh và hình ảnh đơn giản đang dần bộc lộ những hạn chế trong việc đáp ứng nhu cầu nghe - nhìn - tương tác đa phương thức của độc giả hiện đại. Người dùng ngày nay đòi hỏi thông tin không chỉ cập nhật nhanh mà còn phải có chiều sâu, hỗ trợ dịch thuật tự động chuẩn xác, có trợ lý hỗ trợ đàm thoại tìm kiếm tự nhiên, và đặc biệt là khả năng nghe tin tức (Audio News) mọi lúc mọi nơi để tận dụng thời gian bận rộn.
+
+Đồ án **"Cổng thông tin điện tử đa phương tiện NEWS 24H"** được nghiên cứu và phát triển nhằm mục tiêu giải quyết triệt để bài toán này. Bằng cách ứng dụng framework Web hiện đại **Laravel 11** kết hợp với các động cơ trí tuệ nhân tạo thế hệ mới bao gồm **Google Gemini AI Engine (`gemini-2.5-flash`)** và **FPT AI Voice Engine**, dự án đã xây dựng thành công một cổng thông tin toàn diện. Sản phẩm đồ án không chỉ giúp tự động hóa tối đa quy trình làm việc, biên tập nội dung của ban biên tập mà còn nâng cao trải nghiệm người dùng cuối, đồng thời hướng tới tính nhân văn sâu sắc thông qua việc hỗ trợ toàn diện nhóm độc giả khiếm thị hoặc người cao tuổi khó khăn trong việc tiếp cận chữ viết.
+
+---
+
+## 📌 2. Đặt vấn đề
+
+### 2.1 Định nghĩa vấn đề
+Qua quá trình nghiên cứu và khảo sát thực tế hành vi người dùng đọc tin tức số tại Việt Nam, nhóm nghiên cứu đã xác định các vấn đề nổi cộm sau:
+
+#### A. Rào cản Dịch thuật và Tiếp cận Độc giả Quốc tế:
+Tin tức nội địa thường bị cô lập với độc giả nước ngoài do quy trình dịch thuật thủ công mất nhiều thời gian và chi phí nhân sự. Việc sử dụng các công cụ dịch tự động nhúng ngoài (như widget dịch của Google Translate) mang lại chất lượng bản dịch rất thấp do dịch từng từ đơn (word-by-word) mà không hiểu ngữ cảnh văn phong báo chí chính thống, đồng thời phá vỡ cấu trúc CSS/HTML làm vỡ nát giao diện bài báo.
+
+#### B. Khó khăn trong Tìm kiếm và Tương tác theo Ngữ cảnh Tự nhiên:
+Công cụ tìm kiếm từ khóa truyền thống chỉ dựa trên so khớp chuỗi SQL đơn giản, không hiểu ý định người dùng. Độc giả cần một trợ lý ảo đàm thoại trực tiếp ngay trên trang web, hiểu sâu cơ sở dữ liệu tin tức thực tế của chính tòa soạn để đề xuất các bài báo liên quan theo thời gian thực mà không bị hoang tưởng thông tin (hallucination).
+
+#### C. Sự thiếu hụt của Audio News chất lượng cao:
+Xuuyên suốt quá trình đọc tin tức, nhu cầu nghe tin tức số (Audio News/Podcast) đang bùng nổ mạnh mẽ khi người dùng bận rộn lái xe, làm việc nhà. Tuy nhiên, rất ít trang báo hỗ trợ đọc bài viết, hoặc nếu có thì giọng đọc vô cùng máy móc, đơn điệu. Đồng thời, kỹ thuật truyền tải tệp âm thanh từ API chưa được tối ưu hóa, gây gián đoạn và nghẽn băng thông máy chủ khi nhiều người cùng nghe đồng thời.
+
+#### D. Trải nghiệm Chế độ Tối (Dark Mode) sơ sài:
+Đọc báo ban đêm trên màn hình nền trắng gây mỏi mắt, suy giảm thị lực. Các hệ thống hiện tại hầu hết chưa hỗ trợ Dark Mode đồng bộ hoặc bị lỗi chớp nháy trắng màn hình (Flicker) khi người dùng chuyển sang trang mới do tài nguyên CSS không được tải trước.
+
+#### E. Hiệu suất Biên tập viên thấp:
+Biên tập viên tốn nhiều thời gian để soạn thảo bài báo từ ý tưởng thô sơ hoặc viết tóm tắt xem trước (Sapo/Description) cho các bài viết dài hàng ngàn từ. Hệ thống cần công cụ AI Autowriter hỗ trợ viết bài và tóm tắt tự động trực tiếp trên giao diện soạn thảo.
+
+---
+
+## 🔍 3. Các giải pháp đã có
+
+### 3.1 Phân tích các giải pháp/hệ thống tương tự đã có
+Nhóm nghiên cứu đã thực hiện khảo sát chuyên sâu cấu trúc kỹ thuật của các trang báo lớn tại Việt Nam như VnExpress, Dân Trí và các nền tảng CMS phổ biến:
+
+* **Hệ thống báo VnExpress**: Đã triển khai giọng đọc nhân tạo tương đối tốt. Tuy nhiên, hệ thống giọng đọc chưa hỗ trợ đa dạng vùng miền một cách tự nhiên. Giao diện Dark Mode chưa được tối ưu hóa sâu trên toàn bộ trang. Hệ thống chưa tích hợp chatbot AI tương tác trực tiếp dựa trên chính cơ sở dữ liệu thời gian thực của trang báo.
+* **Hệ thống báo Dân Trí**: Giao diện hiện đại, nhưng tính năng tìm kiếm vẫn dựa hoàn toàn vào so khớp từ khóa truyền thống của MySQL, không có khả năng hiểu câu hỏi ngữ cảnh tự nhiên. Chưa hỗ trợ dịch thuật tự động trực tiếp bảo toàn mã HTML của bài viết gốc.
+* **Các trang tin ứng dụng CMS nguồn mở (WordPress, Joomla)**: Thường cài đặt các Plugin trôi nổi từ bên thứ ba để tích hợp Dark Mode hoặc nhúng cửa sổ chat ngoài (Tawk.to, Chatfuel). Điều này gây ra những hệ lụy nghiêm trọng: làm tăng dung lượng tải trang, dễ xung đột JavaScript phá vỡ layout, và tiềm ẩn nguy cơ bảo mật rò rỉ khóa API do lưu trữ trực tiếp ở mã nguồn Client.
+
+### 3.2 Một số hạn chế của các giải pháp đó
+* **Vỡ giao diện**: Google Translate widget ghi đè trực tiếp lên cây DOM của trang web, phá hủy toàn bộ các class và thẻ định dạng CSS đặc thù của bài báo.
+* **Phản hồi AI không chính xác**: Chatbot nhúng ngoài chỉ trả lời chung chung dựa trên dữ liệu cũ của mô hình gốc, không biết đến các bài báo vừa xuất bản của tòa soạn.
+* **Chớp màn hình trắng**: Đổi trang chế độ tối trên các CMS thông thường bị chớp sáng do class `dark-mode` được gán bằng JS sau khi cây DOM đã vẽ xong giao diện nền trắng.
+
+---
+
+## 💡 4. Giải pháp đề xuất
+
+### 4.1 Mô tả tổng quan về giải pháp đề xuất
+Nhóm nghiên cứu đề xuất giải pháp xây dựng hệ thống **NEWS 24H** - Cổng thông tin đa phương tiện tối ưu hóa trải nghiệm đọc và nghe tin tức, sử dụng cấu trúc framework an toàn **Laravel 11** kết hợp với hệ thống biến CSS3 Custom Properties động và tích hợp trực tiếp 2 dịch vụ API cốt lõi:
+
+1. **Google Gemini AI Engine (`gemini-2.5-flash`)**: Sử dụng gói mô hình chính thức có hạn ngạch lớn và độ trễ thấp để thực hiện:
+   * **Dịch thuật bảo toàn HTML**: Dịch thuật thông minh bài viết sang tiếng Anh giữ nguyên cấu trúc các thẻ định dạng (`h3`, `p`, `strong`, `ul`, `li`), tích hợp bộ đệm phía Client tránh gọi trùng lặp API.
+   * **Tóm tắt bài báo**: Sử dụng mô hình AI rút gọn nội dung bài viết dài thành 2-3 câu ngắn gọn kèm hiệu ứng Typing động.
+   * **Trợ lý Chatbot AI**: Ứng dụng kỹ thuật RAG tối giản bằng cách nạp context 15 bài báo mới nhất đang hoạt động vào làm dữ liệu nền, hỗ trợ đề xuất bài viết liên quan bằng các liên kết tĩnh an toàn.
+   * **AI Autowriter**: Admin chỉ cần viết ý tưởng thô ở mô tả ngắn, AI sẽ mở rộng và tự động soạn thảo bài viết đầy đủ định dạng trực tiếp vào CKEditor 5.
+2. **FPT AI Voice Engine**: Chuyển đổi văn bản sạch sang tệp âm thanh `.mp3` chất lượng cao, tích hợp hàng đợi kiểm tra trạng thái không đồng bộ (`Polling Algorithm`) để phát tệp mượt mà trên trình duyệt.
+3. **Đồng bộ Dark Mode Premium**: Sử dụng Immediate Script tại thẻ `<head>` loại bỏ chớp sáng trắng, đồng bộ toàn bộ màu nền, nút bấm và viền Bootstrap.
+
+---
+
+## 🛠️ 5. Thiết kế và triển khai
+
+### 5.1 Các yêu cầu chức năng (Functional Requirements)
+
+Hệ thống được thiết kế phân quyền chặt chẽ với 3 tác nhân tương tác:
+
+| Tác nhân (Actor) | Yêu cầu Chức năng | Mô tả chi tiết |
+| :--- | :--- | :--- |
+| **Độc giả (Guests/Users)** | Đọc bài viết | Xem tin tức trang chủ, chuyên mục, chi tiết bài báo, tăng lượt xem động. |
+| | Lọc và Tìm kiếm | Tìm kiếm tin tức theo từ khóa, lọc bài viết theo từng chuyên mục động. |
+| | Đăng bình luận | Đăng thảo luận dưới bài viết (yêu cầu xác thực tài khoản). |
+| | Chuyển chế độ tối | Bật/tắt Dark Mode tức thì, ghi nhớ tùy chọn vào localStorage trình duyệt. |
+| | Hỏi Trợ lý AI | Trò chuyện với Trợ lý ảo, nhận đề xuất bài viết chuẩn xác, duy trì cuộc chat. |
+| | Dịch thuật AI | Nhấn nút chuyển đổi bài báo sang Tiếng Anh / Tiếng Việt bảo toàn layout HTML. |
+| | Nghe báo nói TTS | Phát giọng đọc bài báo chất lượng cao, có nút dừng và hiệu ứng sóng nhạc. |
+| **Biên tập viên (Writers)** | Viết bài mới | Soạn bài viết có Tiêu đề, Chuyên mục, Mô tả ngắn, Ảnh đại diện, và Nội dung. |
+| | Gợi ý soạn thảo | Nhập ý tưởng thô ở mô tả ngắn, gọi AI viết bài tự điền vào CKEditor 5. |
+| **Quản trị viên (Admins)** | Quản lý Chuyên mục | Nghiệp vụ CRUD (Tạo, Đọc, Sửa, Xóa) chuyên mục tin tức an toàn trong cơ sở dữ liệu. |
+| | Đồng bộ chuyên mục | Tự động đồng bộ đổi tên danh mục của hàng loạt bài viết (`Cascading Update`). |
+| | Quản lý thành viên | Quản lý, cấp quyền tài khoản biên tập viên hoặc khóa người dùng vi phạm. |
+| | Kiểm duyệt | Duyệt bài viết mới hoặc xóa các bình luận tiêu cực của độc giả dưới bài báo. |
+
+---
+
+### 5.2 Các yêu cầu phi chức năng (Non-Functional Requirements)
+* **Hiệu năng hiển thị**: Chỉ số FCP (First Contentful Paint) đạt dưới **0.5 giây**. Thời gian phản hồi API AI tóm tắt, dịch thuật hoặc chatbot dưới **1.2 giây**.
+* **Độ tương thích di động**: Giao diện đáp ứng 100% các tiêu chuẩn Mobile-Friendly của Google, tự động co giãn lưới cột Bootstrap 5 trên màn hình từ 320px đến 1920px.
+* **Bảo mật và toàn vẹn dữ liệu**:
+  * Mã hóa mật khẩu người dùng bằng thuật toán băm bảo mật Bcrypt.
+  * Ngăn ngừa hoàn toàn lỗ hổng XSS bằng cách làm sạch dữ liệu HTML trả về từ API AI.
+  * Ngăn ngừa lỗ hổng CSRF bằng token xác thực bắt buộc của Laravel trên mọi yêu cầu AJAX/Fetch POST.
+  * Khóa API FPT AI và Google Gemini được cô lập ở tệp tin cấu hình `.env` phía Server, không bao giờ lộ ra mã nguồn Client.
+
+---
+
+### 5.3 Các ràng buộc (Constraints)
+
+#### Các ràng buộc về triển khai:
+* Mã nguồn viết bằng ngôn ngữ PHP từ 8.2 trở lên, chạy trên cấu trúc framework Laravel 11. CSDL MySQL từ 8.0 trở lên.
+* Phía Client yêu cầu trình duyệt phải bật JavaScript và hỗ trợ HTML5 Audio Engine để nghe đọc báo nói.
+
+#### Các ràng buộc kinh tế:
+* Tận dụng tối đa các API miễn phí của Google AI Studio (`gemini-2.5-flash`) với hạn ngạch rộng rãi để vận hành trang web phi thương mại mà không phát sinh chi phí mua tài nguyên.
+
+#### Các ràng buộc về đạo đức:
+* AI Chatbot cam kết chỉ tư vấn thông tin tin tức thực tế nằm trong cơ sở dữ liệu, tuyệt đối không bịa đặt hoặc bóp méo thông tin chính thống của tòa soạn.
+* Quyền riêng tư của độc giả được bảo vệ tuyệt đối: Hệ thống tự động xóa sạch bộ nhớ đệm chat khi độc giả Đăng xuất hoặc Đăng nhập lại tài khoản khác.
+
+---
+
+### 5.4 Mô hình hệ thống / Thiết kế giải pháp
+
+#### Các kịch bản của hệ thống (Use-cases)
+Sơ đồ Use-case tổng thể của NEWS 24H phân quyền 3 vai trò:
+
+```mermaid
+usecaseDiagram
+    actor "Độc giả" as Reader
+    actor "Biên tập viên" as Writer
+    actor "Quản trị viên" as Admin
+
+    Reader --> (Đọc bài báo)
+    Reader --> (Nghe báo nói TTS)
+    Reader --> (Hỏi trợ lý AI & Lưu chat)
+    Reader --> (Dịch bài báo AI)
+    Reader --> (Đăng bình luận)
+
+    Writer --> (Soạn bài viết mới)
+    Writer --> (Sử dụng AI Autowriter gợi ý bài)
+
+    Admin --> (Quản lý chuyên mục CRUD)
+    Admin --> (Đồng bộ đổi tên Chuyên mục)
+    Admin --> (Xét duyệt bài viết)
+```
+
+#### Mô hình lớp và đối tượng (Class Diagram)
+Mô hình biểu diễn mối quan hệ giữa các thực thể CSDL (Models) và lớp xử lý logic AI:
+
+```mermaid
+classDiagram
+    class User {
+        +int id
+        +string name
+        +string email
+        +string role
+        +getComments()
+    }
+    class Category {
+        +int id
+        +string name
+        +string slug
+        +getPosts()
+    }
+    class Post {
+        +int id
+        +string title
+        +string slug
+        +string description
+        +string content
+        +string category
+        +int views
+        +getComments()
+    }
+    class Comment {
+        +int id
+        +int user_id
+        +int post_id
+        +string content
+    }
+    class GeminiService {
+        -string apiKey
+        -string baseUrl
+        +generate(prompt)
+        +summarize(content)
+        +translateContent(content, lang)
+        +chatWithAssistant(message, context)
+        +suggestContent(description)
+    }
+
+    Category "1" -- "0..*" Post : "phân loại"
+    User "1" -- "0..*" Comment : "đăng"
+    Post "1" -- "0..*" Comment : "chứa"
+```
+
+#### Các biểu đồ tuần tự (Sequence Diagram)
+Sơ đồ tuần tự biểu diễn quy trình xử lý không đồng bộ của chức năng nghe đọc báo TTS giữa Trình duyệt độc giả, Web Server Laravel và FPT AI Speech API:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Reader as Độc giả (Client)
+    participant Audio as HTML5 Audio Engine
+    participant Ctrl as AIController (Laravel)
+    participant FPT as FPT AI Speech API
+
+    Reader->>Ctrl: Click "Nghe bài báo" (Gửi text bài viết đã lọc sạch HTML)
+    Ctrl->>FPT: POST request gửi text kèm Voice "minhquang"
+    FPT-->>Ctrl: Phản hồi JSON chứa URL tệp MP3 (Đang tạo)
+    Ctrl-->>Reader: Trả về URL MP3 dạng chờ
+    Note over Reader: JavaScript kích hoạt vòng lặp Polling (setInterval 1s)
+    loop Thử tải âm thanh
+        Reader->>Audio: Kiểm tra tệp MP3 bằng new Audio(url)
+        Audio-->>Reader: Trả về trạng thái canplaythrough (Đã xong) / error (Đang xử lý)
+    end
+    Note over Reader: Dừng Polling khi canplaythrough được kích hoạt
+    Reader->>Audio: audio.play()
+    Note over Reader: Giao diện chuyển sang "Dừng nghe" kèm nhịp điệu nhạc
+```
+
+---
+
+### 🕹️ 5.5 Đặc tả Chi tiết Tất cả các Nút chức năng & Giao diện Hành động (UI Buttons & Actions Specification)
+
+NEWS 24H sở hữu hệ thống nút tương tác cao cấp được lập trình chi tiết để đảm bảo hiệu suất tốt nhất cho độc giả và người quản trị. Dưới đây là mô tả chi tiết, mã nguồn sự kiện và quy trình xử lý của từng nút bấm hành động trong hệ thống:
+
+#### 🌓 A. Nhóm Nút Tương tác Giao diện & Trải nghiệm Đọc (Reader UX Buttons)
+
+##### 1. Nút Chuyển đổi Chế độ Sáng/Tối (`#theme-toggle-btn`)
+* **Vị trí hiển thị**: Góc phải của thanh điều hướng (`sticky-header`), nằm ngay bên cạnh ô tìm kiếm.
+* **Phong cách Thiết kế**: Dạng bong bóng kính tròn Glassmorphic, viền bóng mờ, đổi icon Moon (`bi-moon-fill` - màu xám) sang icon Mặt Trời (`bi-sun-fill` - màu vàng).
+* **Mã sự kiện JavaScript**:
+  ```javascript
+  const themeBtn = document.getElementById('theme-toggle-btn');
+  const themeIcon = document.getElementById('theme-icon');
+  
+  function updateThemeUI(isDark) {
+      if (isDark) {
+          document.documentElement.classList.add('dark-mode');
+          if (themeIcon) themeIcon.className = 'bi bi-sun-fill text-warning fs-5';
+          localStorage.setItem('theme', 'dark');
+      } else {
+          document.documentElement.classList.remove('dark-mode');
+          if (themeIcon) themeIcon.className = 'bi bi-moon-fill text-secondary fs-5';
+          localStorage.setItem('theme', 'light');
+      }
+  }
+  
+  if (themeBtn) {
+      themeBtn.addEventListener('click', function() {
+          const currentDark = document.documentElement.classList.contains('dark-mode');
+          updateThemeUI(!currentDark);
+      });
+  }
+  ```
+  * **Hành động**: Can thiệp trực tiếp vào gốc DOM `<html>` và gán class `.dark-mode` tức thì mà không gây trễ giao diện. Đồng thời ghi nhớ giá trị vào bộ nhớ `localStorage`.
+
+##### 2. Nút Tóm tắt Bài viết bằng AI (`#ai-summarize-btn`)
+* **Vị trí hiển thị**: Sidebar bên phải của trang chi tiết bài báo (`article.blade.php`), nằm trong bảng điều khiển AI Control Panel.
+* **Phong cách Thiết kế**: Nút bo tròn màu Gradient Indigo-Purple, chữ trắng, chứa icon đũa thần nổi bật (`fas fa-magic`).
+* **Mã sự kiện JavaScript**:
+  ```javascript
+  document.getElementById('ai-summarize-btn').addEventListener('click', function() {
+      const summarizeBtn = this;
+      const box = document.getElementById('ai-summary-box');
+      const contentArea = document.getElementById('ai-summary-content');
+      
+      box.classList.remove('d-none');
+      summarizeBtn.disabled = true;
+      summarizeBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Đang tóm tắt...';
+      
+      const articleText = document.querySelector('.content-text').innerText;
+  
+      fetch('{{ route("ai.summarize") }}', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': '{{ csrf_token() }}'
+          },
+          body: JSON.stringify({ content: articleText })
+      })
+      .then(response => response.json())
+      .then(data => {
+          contentArea.classList.remove('ai-typing-effect');
+          if (data.summary) {
+              // Hiệu ứng chữ tự động gõ (Typing Simulator)
+              let index = 0;
+              contentArea.innerText = '';
+              const text = data.summary;
+              function typeWriter() {
+                  if (index < text.length) {
+                      contentArea.innerHTML += text.charAt(index);
+                      index++;
+                      setTimeout(typeWriter, 15);
+                  } else {
+                      summarizeBtn.innerHTML = '<i class="fas fa-check me-2"></i> Đã tóm tắt';
+                  }
+              }
+              typeWriter();
+          } else {
+              contentArea.innerText = 'Lỗi tóm tắt.';
+              summarizeBtn.disabled = false;
+          }
+      });
+  });
+  ```
+  * **Hành động**: Vô hiệu hóa nút bấm tránh gửi yêu cầu liên tục, gọi API `/ai/summarize` và hiển thị tóm tắt bằng hiệu ứng gõ chữ sinh động.
+
+##### 3. Nút Dịch bài báo đa ngôn ngữ bằng AI (`#ai-translate-btn`)
+* **Vị trí hiển thị**: Nằm ngay bên dưới nút tóm tắt bài viết tại Sidebar của bài báo.
+* **Phong cách Thiết kế**: Màu xanh lục bảo Emerald (`#10b981`), hover chuyển đậm.
+* **Mã sự kiện JavaScript**:
+  ```javascript
+  const translateBtn = document.getElementById('ai-translate-btn');
+  const articleTitle = document.querySelector('.article-title');
+  const articleSapo = document.querySelector('.lead');
+  const contentText = document.querySelector('.content-text');
+  
+  const originalContent = {
+      title: articleTitle ? articleTitle.innerText : '',
+      sapo: articleSapo ? articleSapo.innerText : '',
+      content: contentText ? contentText.innerHTML : ''
+  };
+  let translatedContent = null; 
+  
+  translateBtn.addEventListener('click', function() {
+      const currentLang = this.getAttribute('data-lang'); 
+      const btnText = this.querySelector('span');
+      const btnIcon = this.querySelector('i');
+      
+      if (currentLang === 'en') {
+          // Khôi phục Tiếng Việt tức thì từ cache cục bộ
+          if (articleTitle) articleTitle.innerText = originalContent.title;
+          if (articleSapo) articleSapo.innerText = originalContent.sapo;
+          if (contentText) contentText.innerHTML = originalContent.content;
+          this.setAttribute('data-lang', 'vi');
+          this.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+          btnText.innerText = 'Dịch sang Tiếng Anh';
+          btnIcon.className = 'fas fa-language me-2';
+          return;
+      }
+      
+      if (translatedContent) {
+          // Phục hồi Tiếng Anh từ bộ nhớ đệm mà không gọi lại API
+          if (articleTitle) articleTitle.innerHTML = translatedContent.title;
+          if (articleSapo) articleSapo.innerHTML = translatedContent.sapo;
+          if (contentText) contentText.innerHTML = translatedContent.content;
+          this.setAttribute('data-lang', 'en');
+          this.style.background = 'linear-gradient(135deg, #4b5563 0%, #1f2937 100%)';
+          btnText.innerText = 'Xem Tiếng Việt';
+          btnIcon.className = 'fas fa-undo me-2';
+          return;
+      }
+      
+      translateBtn.disabled = true;
+      btnText.innerText = 'Đang dịch thuật...';
+      
+      const combinedHtml = `
+          <div id="t-title">${originalContent.title}</div>
+          <div id="t-sapo">${originalContent.sapo}</div>
+          <div id="t-body">${originalContent.content}</div>
+      `;
+      
+      fetch('{{ route("ai.translate") }}', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': '{{ csrf_token() }}'
+          },
+          body: JSON.stringify({ content: combinedHtml, target_lang: 'en' })
+      })
+      .then(response => response.json())
+      .then(data => {
+          translateBtn.disabled = false;
+          if (data.translated) {
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(data.translated, 'text/html');
+              translatedContent = {
+                  title: doc.getElementById('t-title') ? doc.getElementById('t-title').innerHTML : 'Translated Title',
+                  sapo: doc.getElementById('t-sapo') ? doc.getElementById('t-sapo').innerHTML : 'Translated Sapo',
+                  content: doc.getElementById('t-body') ? doc.getElementById('t-body').innerHTML : 'Translated Content'
+              };
+              
+              if (articleTitle) articleTitle.innerHTML = translatedContent.title;
+              if (articleSapo) articleSapo.innerHTML = translatedContent.sapo;
+              if (contentText) contentText.innerHTML = translatedContent.content;
+              
+              translateBtn.setAttribute('data-lang', 'en');
+              translateBtn.style.background = 'linear-gradient(135deg, #4b5563 0%, #1f2937 100%)';
+              btnText.innerText = 'Xem Tiếng Việt';
+              btnIcon.className = 'fas fa-undo me-2';
+          }
+      });
+  });
+  ```
+  * **Hành động**: Hoán đổi ngôn ngữ Tiêu đề, Mô tả và Nội dung của trang bài viết, duy trì bản dịch trong bộ đệm Client để tiết kiệm token và tăng tốc độ hiển thị.
+
+##### 4. Nút Nghe bài viết / Báo nói TTS (`#tts-btn`)
+* **Vị trí hiển thị**: Cuối bảng điều khiển AI Sidebar.
+* **Phong cách Thiết kế**: Nút Outline Gradient trong suốt viền cầu vồng. Tự động chuyển đổi màu đỏ rực nguy hiểm (`btn-danger`) kèm icon Stop và hiệu ứng sóng nhạc khi phát.
+* **Mã sự kiện JavaScript**:
+  ```javascript
+  const ttsBtn = document.getElementById('tts-btn');
+  let audio = null;
+  let isSpeaking = false;
+  
+  ttsBtn.addEventListener('click', function() {
+      if (isSpeaking) {
+          resetTtsBtn();
+          return;
+      }
+      
+      const articleText = document.querySelector('.content-text').innerText;
+      ttsBtn.disabled = true;
+      ttsBtn.classList.add('pulse-animation');
+      ttsBtn.querySelector('span').innerText = 'Đang kết nối...';
+  
+      fetch('{{ route("ai.tts") }}', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': '{{ csrf_token() }}'
+          },
+          body: JSON.stringify({ text: articleText })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.async && data.error == 0) {
+              playFptAudio(data.async);
+          } else {
+              resetTtsBtn();
+          }
+      });
+  });
+  
+  function playFptAudio(url) {
+      const ttsIcon = ttsBtn.querySelector('i');
+      const ttsText = ttsBtn.querySelector('span');
+      ttsText.innerText = 'Đang xử lý...';
+      let attempts = 0;
+      const maxAttempts = 30;
+      
+      const checkAudioReady = setInterval(() => {
+          attempts++;
+          const tempAudio = new Audio(url);
+          tempAudio.addEventListener('canplaythrough', () => {
+              clearInterval(checkAudioReady);
+              audio = tempAudio;
+              audio.play();
+              isSpeaking = true;
+              ttsBtn.disabled = false;
+              ttsBtn.classList.remove('btn-ai-outline', 'pulse-animation');
+              ttsBtn.classList.add('btn-danger');
+              ttsIcon.className = 'fas fa-stop me-2';
+              ttsText.innerText = 'Dừng nghe';
+              audio.onended = () => resetTtsBtn();
+          }, { once: true });
+          
+          tempAudio.addEventListener('error', () => {
+              if (attempts >= maxAttempts) {
+                  clearInterval(checkAudioReady);
+                  alert('Lỗi tạo giọng nói.');
+                  resetTtsBtn();
+              }
+          }, { once: true });
+      }, 1000);
+  }
+  
+  function resetTtsBtn() {
+      isSpeaking = false;
+      ttsBtn.disabled = false;
+      ttsBtn.classList.remove('pulse-animation', 'btn-danger');
+      ttsBtn.classList.add('btn-ai-outline');
+      ttsBtn.querySelector('i').className = 'fas fa-volume-up me-2';
+      ttsBtn.querySelector('span').innerText = 'Nghe bài';
+      if (audio) {
+          audio.pause();
+          audio = null;
+      }
+  }
+  ```
+  * **Hành động**: Gọi API tổng hợp FPT AI, xử lý hàng đợi Polling, tự động phát âm thanh thông qua đối tượng Audio của HTML5.
+
+---
+
+#### 🤖 B. Nhóm Nút Tương tác của Trợ lý Chatbot AI (AI Chatbot Floating Controls)
+
+##### 1. Bong bóng Trợ lý Robot AI (`#ai-chatbot-bubble`)
+* **Vị trí hiển thị**: Ghim cố định ở góc dưới cùng bên phải màn hình.
+* **Phong cách Thiết kế**: Nút tròn kích thước lớn (60x60px), màu Gradient Indigo-Purple rực rỡ, đổ bóng sâu tạo chiều nổi trên trang tin.
+* **Hành động**: Click để Toggle đóng/mở cửa sổ Chatbot (#ai-chatbot-window). Ghi nhớ tùy chọn đóng/mở vào `localStorage.setItem('news_chat_window_open', ...)`.
+
+##### 2. Nút Đóng hộp thoại Chat (`#chat-close-btn`)
+* **Vị trí hiển thị**: Góc trên bên phải thanh Header của hộp thoại Chat.
+* **Phong cách Thiết kế**: Biểu tượng dấu nhân mảnh màu trắng (`btn-close-white`).
+* **Hành động**: Ẩn cửa sổ chat, cập nhật LocalStorage `news_chat_window_open` về `'false'`.
+
+##### 3. Các nút Nhãn gợi ý câu hỏi nhanh (`.chat-suggest-item`)
+* **Vị trí hiển thị**: Nằm ngay bên dưới phần giới thiệu chào mừng của hộp chat mặc định.
+* **Phong cách Thiết kế**: Các dòng chữ liên kết màu xanh sáng, có biểu tượng chỉ dẫn đầu dòng.
+* **Hành động**: Nhấp chọn sẽ tự gán văn bản câu hỏi vào ô nhập liệu (`#chat-user-input`) và tự động gửi tin tức lập tức lên máy chủ AI.
+
+##### 4. Nút Gửi tin nhắn Chatbot (`#chat-send-btn`)
+* **Vị trí hiển thị**: Góc dưới bên phải khung nhập liệu của hộp chat.
+* **Phong cách Thiết kế**: Nút tròn màu xanh đậm chứa icon máy bay giấy trắng (`bi-send-fill`).
+* **Hành động**: Đọc nội dung ô nhập liệu, kích hoạt Typing hiệu ứng, gọi POST `/ai/chat`, gửi tin nhắn độc giả kèm context 15 bài báo mới nhất và lưu lịch sử chat vào LocalStorage.
+
+---
+
+#### 📁 C. Nhóm Nút Vận hành Admin & Soạn thảo (Admin CRUD & Autowriter Buttons)
+
+##### 1. Nút AI soạn thảo bài viết tự động (`#ai-suggest-btn`)
+* **Vị trí hiển thị**: Trên thanh công cụ soạn thảo của bài viết mới (`admin/create.blade.php`), nằm ngay trên cùng bên phải của khu vực nhập nội dung.
+* **Phong cách Thiết kế**: Nút viền xám mờ tinh tế chứa icon biểu tượng Robot (`bi-robot`).
+* **Mã sự kiện JavaScript**:
+  ```javascript
+  document.getElementById('ai-suggest-btn').addEventListener('click', function() {
+      const description = document.querySelector('textarea[name="description"]').value;
+      if (!description || description.trim() === '') {
+          alert('Vui lòng nhập mô tả ngắn trước khi dùng AI gợi ý bài viết!');
+          return;
+      }
+  
+      const btn = this;
+      const loading = document.getElementById('ai-loading');
+      btn.disabled = true;
+      loading.classList.remove('d-none');
+  
+      fetch('{{ route("ai.suggest") }}', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-TOKEN': '{{ csrf_token() }}'
+          },
+          body: JSON.stringify({ description: description })
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.suggestion) {
+              // Điền dữ liệu trực tiếp vào thực thể soạn thảo CKEditor 5
+              editorInstance.setData(data.suggestion);
+          } else {
+              alert('Lỗi gợi ý bài viết.');
+          }
+      })
+      .catch(err => {
+          alert('Lỗi kết nối AI.');
+      })
+      .finally(() => {
+          btn.disabled = false;
+          loading.classList.add('d-none');
+      });
+  });
+  ```
+  * **Hành động**: Gọi API `/ai/suggest` để tự động hóa viết bài chi tiết và điền thẳng vào CKEditor 5.
+
+##### 2. Nút Khởi tạo Chuyên mục mới (`[data-bs-target="#createCategoryModal"]`)
+* **Vị trí hiển thị**: Góc trên cùng bên phải màn hình danh sách Chuyên mục của Admin.
+* **Hành động**: Mở Modal để Admin nhập tên Chuyên mục mới. Khi submit, tự động chuyển đổi chữ viết thường thành Slug SEO và ghi nhận vào cơ sở dữ liệu.
+
+##### 3. Nút Thao tác Sửa Chuyên Mục (`[data-bs-target="#editModal..."]`)
+* **Vị trí hiển thị**: Cột thao tác cuối cùng của từng dòng chuyên mục.
+* **Hành động**: Mở Modal chỉnh sửa chuyên mục riêng biệt cho từng bản ghi, tự động điền sẵn tên cũ và cho phép cập nhật đồng bộ CSDL.
+
+##### 4. Nút Xóa Chuyên Mục (`DELETE Form Submit`)
+* **Vị trí hiển thị**: Cạnh nút Sửa chuyên mục.
+* **Hành động**: Gửi yêu cầu DELETE lên route quản trị, xóa chuyên mục và bảo vệ an toàn các bài viết liên quan.
+
+---
+
+### 5.6 Các màn hình giao diện người dùng
+Giao diện người dùng được thiết kế tỉ mỉ, tuân thủ các quy tắc mỹ thuật số hiện đại:
+1. **Màn hình trang chủ độc giả**: Bao gồm thanh Breaking News Ticker bo tròn tự chạy ở đầu, khu vực Triple Hero hiển thị bài viết nổi bật, bố cục phong cách tạp chí cao cấp ở phần Thời trang & Làm đẹp, và các Widgets hữu dụng tại Sidebar (Thời tiết, Bài báo Xu hướng).
+2. **Màn hình đọc chi tiết bài báo**: Bố cục nội dung rõ ràng với font chữ Lora nhẹ mắt, Sidebar chứa bảng điều khiển AI hỗ trợ Tóm tắt, Dịch thuật bài viết, và Nghe bài báo nói.
+3. **Màn hình bong bóng chat trợ lý AI**: Bong bóng mờ đục nổi góc phải dưới, khung chat hỗ trợ danh sách tin nhắn, Typing hiệu ứng và gợi ý câu hỏi.
+4. **Màn hình Quản trị chuyên mục Admin**: Bảng quản lý gọn gàng, hiển thị đếm số bài viết trực quan và có nút tạo mới chuyên mục kèm Auto-Slug bằng JS.
+
+#### Một số thành phần khác của đồ án (Database Migration & CSS Dark Mode Tokens)
+Hệ thống màu sắc cao cấp dành riêng cho chế độ tối (Dark Mode):
+```css
+html.dark-mode {
+    --bg-light: #0b0f19;       /* Xanh tối navy sâu thẳm */
+    --text-main: #cbd5e1;      /* Bạc mịn slate */
+    --text-heading: #ffffff;   /* Trắng sáng */
+    --card-bg: #151f32;        /* Xanh navy nhạt làm nổi bật thẻ */
+    --border-color: rgba(255,255,255,0.08);
+    --input-bg: #1e293b;
+}
+```
+
+---
+
+## 📅 6. Kế hoạch dự án
+
+Dự án được triển khai và hoàn thiện trong vòng **4 tuần** với biểu đồ Gantt Chart phân bổ chi tiết công việc như sau:
+
+| Tuần | Công việc | Thành viên phụ trách | Trạng thái |
+| :--- | :--- | :--- | :--- |
+| **Tuần 1** | Khảo sát hiện trạng, thiết kế CSDL, tạo migrations và tạo khung giao diện MVC Laravel. | Trưởng nhóm | **HOÀN THÀNH** |
+| **Tuần 2** | Phát triển chức năng Admin quản lý Chuyên mục CRUD và đồng bộ bài viết. Thiết kế giao diện Light/Dark Mode Premium ngăn chớp trắng. | Thành viên A | **HOÀN THÀNH** |
+| **Tuần 3** | Tích hợp lớp dịch vụ AI Engine (Gemini Service), phát triển tính năng Dịch bài báo, Tóm tắt bài báo, Chatbot gợi ý tin và AI Autowriter. | Thành viên B | **HOÀN THÀNH** |
+| **Tuần 4** | Tích hợp FPT AI Voice Engine, xử lý hàng đợi TTS, thực hiện kiểm thử an toàn bảo mật và viết tài liệu thuyết minh. | Cả nhóm | **HOÀN THÀNH** |
+
+### Biểu đồ Gantt Chart dạng Markdown:
+```
+Nhiệm vụ             │ Tuần 1   │ Tuần 2   │ Tuần 3   │ Tuần 4   │
+─────────────────────┼──────────┼──────────┼──────────┼──────────┼
+Khảo sát & Thiết kế  │██████████│          │          │          │
+Giao diện & CRUD     │          │██████████│          │          │
+Tích hợp Gemini AI   │          │          │██████████│          │
+Tích hợp FPT AI & Test│          │          │          │██████████│
+```
+
+---
+
+## 👥 7. Đảm bảo thực hiện đúng làm việc nhóm
+Nhóm nghiên cứu áp dụng quy trình làm việc theo mô hình **Agile/Scrum** rút gọn:
+* **Họp hàng ngày (Daily Stand-up)**: Mỗi thành viên báo cáo 3 việc (Đã làm gì hôm qua, Sẽ làm gì hôm nay, Có gặp khó khăn gì không).
+* **Quản lý mã nguồn (Git Version Control)**: Sử dụng kho lưu trữ GitHub bảo mật. Phân chia nhánh tính năng rõ ràng (`feature/darkmode`, `feature/gemini`, `feature/tts`) trước khi gộp vào nhánh chính (`main`), giải quyết xung đột code thông qua Pull Request có kiểm duyệt chéo.
+
+---
+
+## ⚖️ 8. Các vấn đề về đạo đức và làm việc chuyên nghiệp
+* **Tôn trọng sở hữu trí tuệ**: Toàn bộ tài nguyên mã nguồn, biểu tượng ứng dụng và thư viện bên thứ ba đều tuân thủ giấy phép nguồn mở (MIT License, Apache 2.0).
+* **Chống đạo văn**: Báo cáo học thuật được viết dựa trên quá trình nghiên cứu, tự thiết kế thuật toán và triển khai thực tế của các thành viên, không sao chép trái phép.
+* **Tính chân thực của AI**: Cấu hình Chatbot cam kết chỉ trả lời tin tức dựa trên dữ liệu thật của tòa soạn, không đưa tin giả mạo hoặc bóp méo thông tin chính thống.
+
+---
+
+## 🌍 9. Tác động xã hội
+* **Hỗ trợ người dùng khuyết tật**: Tính năng báo nói TTS mang lại cơ hội tiếp cận tri thức toàn diện cho người dùng khiếm thị, người cao tuổi mắt kém.
+* **Xây dựng xã hội số**: NEWS 24H thúc đẩy quá trình tiếp nhận tin tức văn minh, nhanh chóng, đưa công nghệ AI phục vụ đời sống dân sinh thực tiễn.
+* **Bảo vệ môi trường**: Đọc báo điện tử thay thế cho báo giấy truyền thống giúp tiết kiệm tài nguyên rừng, giảm thiểu rác thải carbon.
+
+---
+
+## 📈 10. Kế hoạch cho kiến thức mới và chiến lược học tập
+* **Kiến thức mới thu nhận**: Hiểu sâu sắc về thiết kế hệ thống phần mềm hướng dịch vụ, quy trình kết nối API, các kỹ thuật Prompt Engineering nâng cao và giải pháp quản lý bộ đệm trình duyệt LocalStorage.
+* **Chiến lược học tập tiếp theo**:
+  * Nghiên cứu sâu về các mô hình tự huấn luyện dữ liệu AI riêng biệt (Fine-tuning LLM).
+  * Tìm hiểu công nghệ nhận diện giọng nói nói ngược lại (Speech-to-Text) phục vụ tìm kiếm tin tức bằng giọng nói.
+  * Nghiên cứu kỹ thuật đồng bộ cơ sở dữ liệu thời gian thực (Real-time Database) sử dụng WebSockets.
+
+---
+
+## 🏁 11. Kết luận
+Dự án **Cổng thông tin đa phương tiện NEWS 24H** đã hoàn thành xuất sắc toàn bộ các mục tiêu đề ra:
+* Thiết lập hệ thống quản lý chuyên mục động đồng bộ 100%.
+* Triển khai hệ thống giao diện tối Premium mượt mà, đẹp mắt.
+* Tích hợp thành công Gemini AI để dịch bài báo bảo toàn HTML, tóm tắt bài báo, tự động viết bài hỗ trợ Admin và chatbot RAG tư vấn tin tức bền vững.
+* Hoàn thiện động cơ chuyển đổi giọng nói FPT AI hoạt động trôi chảy.
+* Hệ thống được kiểm thử an toàn bảo mật, đạt tốc độ tải trang tối ưu và đáp ứng đầy đủ tiêu chuẩn thuyết minh khoa học.
+
+---
+
+## 📚 12. Tài liệu tham khảo
+* [1] Taylor Otwell, *Laravel Documentation: The PHP Framework for Web Artisans*, https://laravel.com/docs/11.x, 2024.
+* [2] Google DeepMind, *Gemini API Quickstart & Model Quotas Guide*, https://ai.google.dev/gemini-api/docs, 2024.
+* [3] FPT AI, *FPT AI Speech Text-to-Speech API Specification*, https://docs.fpt.ai/tts, 2024.

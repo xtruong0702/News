@@ -75,6 +75,8 @@ Route::get('/category/{name}', function ($name) {
 // Các Route AI
 Route::post('/ai/summarize', [\App\Http\Controllers\AIController::class, 'summarize'])->name('ai.summarize');
 Route::post('/ai/tts', [\App\Http\Controllers\AIController::class, 'tts'])->name('ai.tts');
+Route::post('/ai/translate', [\App\Http\Controllers\AIController::class, 'translate'])->name('ai.translate');
+Route::post('/ai/chat', [\App\Http\Controllers\AIController::class, 'chat'])->name('ai.chat');
 
 // Route để sinh data tự động (Chỉ dùng cho mục đích Test)
 Route::get('/generate-posts', function (\Illuminate\Http\Request $request) {
@@ -96,6 +98,9 @@ Route::get('/generate-posts', function (\Illuminate\Http\Request $request) {
 Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
     Route::post('/ai/suggest', [\App\Http\Controllers\AIController::class, 'suggest'])->name('ai.suggest');
     Route::post('/ai/rewrite', [\App\Http\Controllers\AIController::class, 'rewrite'])->name('ai.rewrite');
+
+    // Quản lý Chuyên mục (Admin only CRUD)
+    Route::resource('categories', \App\Http\Controllers\CategoryController::class)->except(['show']);
 
     
     // Dashboard tổng quan

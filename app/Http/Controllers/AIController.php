@@ -31,10 +31,10 @@ class AIController extends Controller
      */
     public function suggest(Request $request)
     {
-        $title = $request->input('title');
-        if (!$title) return response()->json(['error' => 'Tiêu đề trống'], 400);
+        $description = $request->input('description');
+        if (!$description) return response()->json(['error' => 'Mô tả ngắn trống'], 400);
 
-        $suggestion = $this->gemini->suggestContent($title);
+        $suggestion = $this->gemini->suggestContent($description);
         return response()->json(['suggestion' => $suggestion]);
     }
 
@@ -75,5 +75,41 @@ class AIController extends Controller
         }
 
         return response()->json(['error' => 'Không thể tạo giọng nói từ FPT AI.'], 500);
+    }
+
+    /**
+     * API Dịch bài báo đa ngôn ngữ bằng AI
+     */
+    public function translate(Request $request)
+    {
+        $content = $request->input('content');
+        $targetLang = $request->input('target_lang', 'en');
+        if (!$content) return response()->json(['error' => 'Nội dung trống'], 400);
+
+        $translated = $this->gemini->translateContent($content, $targetLang);
+        return response()->json(['translated' => $translated]);
+    }
+
+    /**
+     * API Trợ lý Tin tức AI (Chatbot)
+     */
+    public function chat(Request $request)
+    {
+        $message = $request->input('message');
+        if (!$message) return response()->json(['error' => 'Tin nhắn trống'], 400);
+
+        // Lấy 15 bài báo xuất bản mới nhất để làm ngữ cảnh
+        $posts = \App\Models\Post::where('status', 'published')
+            ->latest()
+            ->take(15)
+            ->get(['title', 'slug', 'category', 'description']);
+
+        $postsContext = "";
+        foreach ($posts as $key => $post) {
+            $postsContext .= ($key + 1) . ". Tiêu đề: \"{$post->title}\" | Chuyên mục: \"{$post->category}\" | Đường dẫn tĩnh (slug): \"{$post->slug}\" | Mô tả ngắn: \"{$post->description}\"\n";
+        }
+
+        $response = $this->gemini->chatWithAssistant($message, $postsContext);
+        return response()->json(['response' => $response]);
     }
 }

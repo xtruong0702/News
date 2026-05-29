@@ -11,7 +11,8 @@ class PostController extends Controller
 {
     // Hiển thị form tạo bài viết
     public function create() {
-        return view('admin.create');
+        $categories = \App\Models\Category::all();
+        return view('admin.create', compact('categories'));
     }
 
     // Lưu bài viết vào Database
@@ -78,7 +79,8 @@ class PostController extends Controller
             return redirect('/admin/posts')->with('error', 'Bài viết đã được duyệt, bạn không thể chỉnh sửa.');
         }
 
-        return view('admin.edit', compact('post'));
+        $categories = \App\Models\Category::all();
+        return view('admin.edit', compact('post', 'categories'));
     }
 
     public function update(Request $request, $id) {

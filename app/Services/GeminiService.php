@@ -8,11 +8,19 @@ use Illuminate\Support\Facades\Log;
 class GeminiService
 {
     protected $apiKey;
-    protected $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent';
+    protected $baseUrl;
 
     public function __construct()
     {
         $this->apiKey = config('services.gemini.key');
+
+        $version = config('services.gemini.version', 'v1');
+        $model = config('services.gemini.model', 'gemini-3.5-flash');
+
+        // Normalize model name (strip any leading 'models/' if present)
+        $model = preg_replace('#^models/#', '', $model);
+
+        $this->baseUrl = "https://generativelanguage.googleapis.com/{$version}/models/{$model}:generateContent";
     }
 
     /**
@@ -58,9 +66,9 @@ class GeminiService
         return $this->generate($prompt);
     }
 
-    public function suggestContent($title)
+    public function suggestContent($description)
     {
-        $prompt = "Hãy đóng vai một biên tập viên tin tức. Dựa trên tiêu đề '{$title}', hãy viết một nội dung bài báo chi tiết, chuyên nghiệp, có đầy đủ các ý chính. Lưu ý QUAN TRỌNG: Chỉ trả về mã HTML sạch, không bao gồm các ký tự đánh dấu markdown như ```html hay ``` ở đầu và cuối. Chỉ sử dụng các thẻ p, h3, strong, ul, li.";
+        $prompt = "Hãy đóng vai một biên tập viên tin tức chuyên nghiệp. Dựa trên mô tả ngắn sau đây: '{$description}', hãy viết một nội dung bài báo chi tiết, đầy đủ các ý chính, có bố cục rõ ràng và hấp dẫn người đọc. Lưu ý QUAN TRỌNG: Chỉ trả về mã HTML sạch, không bao gồm các ký tự đánh dấu markdown như ```html hay ``` ở đầu và cuối. Chỉ sử dụng các thẻ p, h3, strong, ul, li.";
         return $this->generate($prompt);
     }
 
@@ -77,6 +85,45 @@ class GeminiService
         4. Chỉ sử dụng các thẻ p, h3, strong, ul, li.
         
         Nội dung gốc: " . $content;
+        
+        return $this->generate($prompt);
+    }
+
+    /**
+     * Dịch nội dung bài báo sang ngôn ngữ mục tiêu (Tiếng Anh hoặc Tiếng Việt) bảo toàn HTML
+     */
+    public function translateContent($content, $targetLang)
+    {
+        $langName = ($targetLang === 'en') ? 'Anh (English)' : 'Việt (Vietnamese)';
+        $prompt = "Hãy đóng vai một biên dịch viên tin tức chuyên nghiệp. Nhiệm vụ của bạn là dịch nội dung sau đây sang tiếng {$langName}.
+        Lưu ý CỰC KỲ QUAN TRỌNG:
+        1. Phải giữ nguyên 100% tất cả các cấu trúc thẻ HTML (như p, h3, strong, ul, li, div...) ở đúng vị trí cũ.
+        2. Dịch thật tự nhiên, lưu loát, chuẩn văn phong báo chí chính thống.
+        3. Chỉ trả về mã HTML sạch sau khi dịch, TUYỆT ĐỐI không bao gồm các ký tự đánh dấu markdown như ```html hay ``` ở đầu và cuối bài.
+        
+        Nội dung cần dịch: " . $content;
+        
+        return $this->generate($prompt);
+    }
+
+    /**
+     * Trợ lý Chatbot trả lời tin tức dựa trên danh sách bài viết hiện tại
+     */
+    public function chatWithAssistant($message, $postsContext)
+    {
+        $prompt = "Bạn là trợ lý ảo thông minh tên là 'Trợ lý Tin tức AI 🤖' của trang báo điện tử 'NEWS 24H' (phát triển bởi Google DeepMind).
+        Nhiệm vụ của bạn là giải đáp thân thiện, ngắn gọn và hữu ích cho độc giả bằng tiếng Việt.
+        Dưới đây là danh sách 15 bài báo mới nhất đang được đăng tải trên website của chúng ta:
+        
+        {$postsContext}
+        
+        Hãy sử dụng danh sách trên để trả lời thắc mắc của độc giả.
+        Lưu ý CỰC KỲ QUAN TRỌNG:
+        1. Nếu độc giả hỏi về tin tức mới hôm nay, tin nổi bật hoặc tìm bài viết liên quan, hãy gợi ý cho họ các bài báo trong danh sách trên.
+        2. Khi gợi ý một bài viết, hãy chèn link liên kết tĩnh dạng: [Tên bài viết](http://localhost:8000/article/slug-cua-bai-viet) (ví dụ: [Vũ trụ AI](http://localhost:8000/article/vu-tru-ai)). Link này KHÔNG ĐƯỢC thêm dấu tiếng Việt hay khoảng trắng ở phần slug.
+        3. Hãy trả lời ngắn gọn (khoảng 3-4 câu), súc tích, vui vẻ và lịch sự. Nếu họ hỏi về các chủ đề không liên quan đến tin tức hoặc ngoài lề, hãy trả lời ngắn gọn và khéo léo đưa họ quay lại với tin tức của website.
+        
+        Tin nhắn của độc giả: \"{$message}\"";
         
         return $this->generate($prompt);
     }
